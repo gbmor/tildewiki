@@ -40,7 +40,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request, filename string) {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	// check the index page's cache
-	pingCache(&indexCache)
+	pingCache(indexCache)
 
 	// serve the index page
 	w.Header().Set("Content-Type", htmlutf8)

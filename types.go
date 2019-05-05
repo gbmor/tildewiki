@@ -12,7 +12,7 @@ var cachedPages = make(map[string]Page)
 var pmutex = &sync.RWMutex{}
 
 // The in-memory index cache
-var indexCache = indexPage{}
+var indexCache = &indexPage{}
 
 // Mutex for the index cache
 var imutex = &sync.RWMutex{}
