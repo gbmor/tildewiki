@@ -1,5 +1,4 @@
 # Tildewiki [![Go Report Card](https://goreportcard.com/badge/github.com/gbmor/tildewiki)](https://goreportcard.com/report/github.com/gbmor/tildewiki) [![GolangCI](https://img.shields.io/badge/golangci-check-blue.svg)](https://golangci.com/r/github.com/gbmor/tildewiki) [![Travis CI](https://api.travis-ci.org/gbmor/tildewiki.svg?branch=master)](https://travis-ci.org/gbmor/tildewiki)
-
 A wiki engine designed around the needs of the [tildeverse](https://tildeverse.org)
 
 ## [v0.5.2](https://github.com/gbmor/tildewiki/releases/tag/v0.5.2)
@@ -21,25 +20,29 @@ Contains all the new changes going into the next version
 * [gtmetrix report](https://gtmetrix.com/reports/wiki.tilde.institute/F1tzxEch)
 
 ## Features
-
 * Speed is a priority
 * Mobile-friendly pages
 * Markdown!
 * Uses [kognise/water.css](https://github.com/kognise/water.css) dark theme by
 default (and includes as an example, a simple but nice local CSS file)
-* Automatically reloads YAML configuration when a change is detected.
-* Generates list of pages and places at anchor-point in index page
+* YAML configuration
+* Automatically reloads config file when a change is detected.
+* Generates list of pages, then places at an anchor comment in the index page
 * Caches pages to memory and only re-renders when the file changes
-* Extremely configurable:
+* Very configurable. For example:
   * URL path for viewing pages
   * Directory for page data
   * File to use for index page
-  * etc.
+  * Logging output (file, stdout, null) and file location
 * Runs as a multithreaded service, rather than via CGI
 * Easily use Nginx to proxy requests to it. This allows you to use your
 existing SSL certificates.
 
-## Notes
+### Notes
+* Builds with `Go 1.11` and `Go 1.12`. Not tested with any other version.
+* Tested on Linux (Ubuntu 18.04LTS, Debian 9) and OpenBSD 6.4
+* If you have access to other environments and can test, please let me know.
+It will be much appreciated.
 
 For [tildeverse](https://tildeverse.org) projects, we tend to use a PR
 workflow. For example, wiki pages are submitted to the repo via pull
