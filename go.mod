@@ -1,6 +1,6 @@
 module github.com/gbmor/tildewiki
 
-go 1.12
+go 1.11
 
 require (
 	github.com/fsnotify/fsnotify v1.4.7
