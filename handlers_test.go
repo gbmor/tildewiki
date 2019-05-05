@@ -11,6 +11,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+// This is a pretty strict test. Make sure the
+// output of pageHandler is byte-for-byte what
+// I'm expecting it to be.
 func Test_pageHandler(t *testing.T) {
 	tests := []struct {
 		name string
@@ -44,6 +47,7 @@ func Test_pageHandler(t *testing.T) {
 	}
 }
 
+// This is the same test type as pageHandler
 func Test_indexHandler(t *testing.T) {
 	name := "Index Handler Test"
 	w := httptest.NewRecorder()
@@ -61,6 +65,7 @@ func Test_indexHandler(t *testing.T) {
 	})
 }
 
+// This is the same test type as pageHandler
 func Test_iconHandler(t *testing.T) {
 	name := "Icon Handler Test"
 	icon, _ := ioutil.ReadFile(viper.GetString("AssetsDir") + "/" + viper.GetString("Icon"))
@@ -79,6 +84,7 @@ func Test_iconHandler(t *testing.T) {
 	})
 }
 
+// This is the same test type as pageHandler
 func Test_cssHandler(t *testing.T) {
 	name := "CSS Handler Test"
 	if !cssLocal([]byte(viper.GetString("CSS"))) {

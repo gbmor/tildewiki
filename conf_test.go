@@ -19,6 +19,9 @@ var initConfigTests = []struct {
 	},
 }
 
+// Test to make sure it's returning a valid *regexp.Regexp.
+// The function does a lot of stuff internally I can't really
+// test for right here.
 func Test_initConfigParams(t *testing.T) {
 	for _, tt := range initConfigTests {
 		t.Run(tt.name, func(t *testing.T) {

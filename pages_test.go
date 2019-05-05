@@ -188,6 +188,8 @@ var testIndex = indexPage{
 	LastTally: time.Time{},
 }
 
+// Check if checkCache() method on indexPage type
+// is returning the expected bool
 func Test_indexPage_checkCache(t *testing.T) {
 
 	for _, tt := range IndexCacheCases {
@@ -209,6 +211,7 @@ func Benchmark_indexPage_checkCache(b *testing.B) {
 	}
 }
 
+// No output to test here
 func Benchmark_indexPage_cache(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for range IndexCacheCases {
@@ -240,6 +243,7 @@ var PageCacheCases = []struct {
 	},
 }
 
+// See if *Page.cache() is returning an error
 func TestPage_cache(t *testing.T) {
 	for _, tt := range PageCacheCases {
 		t.Run(tt.name, func(t *testing.T) {
@@ -268,6 +272,8 @@ func Benchmark_Page_cache(b *testing.B) {
 	}
 }
 
+// Make sure it's returning a bool. Will modify this
+// test later
 func TestPage_checkCache(t *testing.T) {
 	for _, tt := range PageCacheCases {
 		t.Run(tt.name, func(t *testing.T) {
@@ -300,33 +306,10 @@ func Benchmark_Page_checkCache(b *testing.B) {
 	}
 }
 
-func Test_genPageCache(t *testing.T) {
-	log.SetOutput(hush)
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "first",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			genPageCache()
-		})
-	}
-}
+// No output to test for
 func Benchmark_genPageCache(b *testing.B) {
 	log.SetOutput(hush)
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "first",
-		},
-	}
 	for i := 0; i < b.N; i++ {
-		for range tests {
-			genPageCache()
-		}
+		genPageCache()
 	}
 }

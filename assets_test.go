@@ -18,6 +18,8 @@ var cssLocalTests = []struct {
 	},
 }
 
+// Make sure it's parsing the CSS location correctly
+// and returning the correct bool
 func Test_cssLocal(t *testing.T) {
 	for _, tt := range cssLocalTests {
 		t.Run(string(tt.name), func(t *testing.T) {
