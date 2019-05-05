@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"reflect"
 	"testing"
@@ -11,25 +12,25 @@ import (
 var mdTestData1, _ = ioutil.ReadFile("pages/example.md")
 var mdTestData2, _ = ioutil.ReadFile("pages/test1.md")
 var markdownTests = []struct {
-	name  string
-	css   string
-	title string
-	data  []byte
-	want  *bf.HTMLRenderer
+	name       string
+	css        string
+	title      string
+	data       []byte
+	renderwant []byte
 }{
 	{
-		name:  "one",
-		css:   "assets/wiki.css",
-		title: "test page 1",
-		data:  mdTestData1,
-		want:  bf.NewHTMLRenderer(bf.HTMLRendererParameters{}),
+		name:       "one",
+		css:        "assets/wiki.css",
+		title:      "Example Page",
+		data:       mdTestData1,
+		renderwant: bf.Run(mdTestData1, bf.WithRenderer(setupMarkdown("assets/wiki.css", "Example Page"))),
 	},
 	{
-		name:  "two",
-		css:   "https://tilde.institute/tilde.css",
-		title: "test page 2",
-		data:  mdTestData2,
-		want:  bf.NewHTMLRenderer(bf.HTMLRendererParameters{}),
+		name:       "two",
+		css:        "assets/wiki.css",
+		title:      "No Description",
+		data:       mdTestData2,
+		renderwant: bf.Run(mdTestData2, bf.WithRenderer(setupMarkdown("assets/wiki.css", "No Description"))),
 	},
 }
 
@@ -54,9 +55,8 @@ func Benchmark_setupMarkdown(b *testing.B) {
 func Test_render(t *testing.T) {
 	for _, tt := range markdownTests {
 		t.Run(string(tt.name), func(t *testing.T) {
-			var got interface{} = render(tt.data, tt.css, tt.title)
-			if _, ok := got.([]byte); !ok {
-				t.Errorf("render() didn't return byte array: %v", reflect.TypeOf(got))
+			if !bytes.Equal(render(tt.data, tt.css, tt.title), tt.renderwant) {
+				t.Errorf("render(): byte mismatch\n")
 			}
 		})
 	}
