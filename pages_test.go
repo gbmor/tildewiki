@@ -243,20 +243,8 @@ var PageCacheCases = []struct {
 	},
 }
 
-// See if *Page.cache() is returning an error
-func TestPage_cache(t *testing.T) {
-	for _, tt := range PageCacheCases {
-		t.Run(tt.name, func(t *testing.T) {
-			page := &Page{
-				Longname:  tt.fields.Longname,
-				Shortname: tt.fields.Shortname,
-			}
-			if err := page.cache(); (err != nil) != tt.wantErr {
-				t.Errorf("Page.cache() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
+// Just bench page.cache() since there's no return
+// to test for. I'll write an in-depth test later.
 func Benchmark_Page_cache(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, tt := range PageCacheCases {
@@ -264,10 +252,7 @@ func Benchmark_Page_cache(b *testing.B) {
 				Longname:  tt.fields.Longname,
 				Shortname: tt.fields.Shortname,
 			}
-			err := page.cache()
-			if err != nil {
-				continue
-			}
+			page.cache()
 		}
 	}
 }

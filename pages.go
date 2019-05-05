@@ -118,7 +118,7 @@ func (indexCache *indexPage) checkCache() bool {
 		log.Printf("Couldn't parse index refresh interval: %v\n", err)
 		return true
 	}
-	// check if the index has been changed
+	// stat the index page to get the mod time for the next block
 	stat, err := os.Stat(viper.GetString("AssetsDir") + "/" + viper.GetString("Index"))
 	if err != nil {
 		log.Printf("Couldn't stat index page: %v\n", err)
@@ -130,8 +130,8 @@ func (indexCache *indexPage) checkCache() bool {
 	if indexCache.LastTally.IsZero() || time.Since(indexCache.LastTally) > interval {
 		return true
 	}
-	// if the modtime is zero or the index has changed
-	// on disk, regenerate cache
+	// if the modtime is zero (never cached) or stored mod time is different
+	// from the file's modtime, (re)generate cache
 	if indexCache.Modtime.IsZero() || stat.ModTime() != indexCache.Modtime {
 		return true
 	}
@@ -249,11 +249,7 @@ func writeIndexLinks(pagedir string, viewpath string, f os.FileInfo, buf *bytes.
 	if page.Body == nil {
 		page.Shortname = f.Name()
 		page.Longname = pagedir + "/" + f.Name()
-
-		err := page.cache()
-		if err != nil {
-			log.Printf("Couldn't pull new page %s into cache: %v\n", page.Shortname, err)
-		}
+		page.cache()
 	}
 
 	// get the URI path from the file name
@@ -264,20 +260,20 @@ func writeIndexLinks(pagedir string, viewpath string, f os.FileInfo, buf *bytes.
 }
 
 // Caches a page
-func (page *Page) cache() error {
+func (page *Page) cache() {
 
 	// buildPage() is defined in this file.
 	// it reads the file and builds the Page struct
 	newpage, err := buildPage(page.Longname)
 	if err != nil {
-		return err
+		log.Printf("Couldn't cache %v: %v", page.Longname, err)
+		return
 	}
 
 	pmutex.Lock()
 	cachedPages[newpage.Shortname] = *newpage
 	pmutex.Unlock()
 
-	return nil
 }
 
 // Compare the recorded modtime of a cached page to the
@@ -322,16 +318,20 @@ func genPageCache() {
 
 		go func() {
 			page := newBarePage(pagedir+"/"+f.Name(), f.Name())
-
-			err = page.cache()
-			if err != nil {
-				log.Println("Couldn't cache " + page.Shortname)
-			}
-
+			page.cache()
 			log.Println("Cached page " + page.Shortname)
 			wg.Done()
 		}()
 	}
 
 	wg.Wait()
+}
+
+// Wrapper function to check the cache
+// of any cacher type, and if true,
+// re-cache the data
+func pingCache(c cacher) {
+	if c.checkCache() {
+		c.cache()
+	}
 }
