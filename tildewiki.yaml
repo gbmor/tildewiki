@@ -1,30 +1,41 @@
+
 ####################################################################
 # This config file can live at the following places, in descending #
 # order. The first one found wins, the next locations are ignored  #
 # even if the file exists there too.                               #
 #                                                                  #
+#   ./                                                             #
+#   $HOME/.config/                                                 #
 #   /etc/                                                          #
 #   /usr/local/etc/                                                #
-#   $HOME/.config/                                                 #
-#   ./                                                             #
 #                                                                  #
 # The config file must be called `tildewiki.yaml`                  #
 ####################################################################
 
+
+####################################################################
+# CHANGING THE FOLLOWING OPTIONS NECESSITATES A RESTART ############
+####################################################################
+
 # The port for the service to bind to.
 # Tildewiki will bind to localhost.
-# Changing this requires a restart.
 Port: "8080"
 
 # Change to true to have nothing display after the initial
 # start-up messages
 QuietLogging: false
+
 # Change to true to have all messages beyond the initial
 # start-up go to a file. The name is either relative to
 # the executable or absolute. If QuietLogging is set,
 # nothing will be written to the file.
 FileLogging: false
 LogFile: "tildewiki.log"
+
+
+####################################################################
+# THE REST OF THE OPTIONS DON'T REQUIRE A RESTART ##################
+####################################################################
 
 # Minimum time between cache refreshes for the index page
 # Should be a typical time string: 30m, 60s, 10s, etc.
@@ -34,13 +45,17 @@ IndexRefreshInterval: "30s"
 
 # The name of the wiki
 Name: "Tildewiki"
+
 # Used in the <title> tag between name and description
 TitleSeparator: "::"
+
 # Used between page names and descriptions
 DescSeparator: "::"
+
 # Little blurb for the <title> tag
 ShortDesc: "Wiki for the Tildeverse"
-#Location of the CSS file. Can be relative or remote
+
+# Location of the CSS file. Can be relative or remote
 #CSS: "assets/wiki.css"
 CSS: "https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css"
 
@@ -48,13 +63,16 @@ CSS: "https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css"
 # Like the `index` markdown document (front page), the error pages,
 # the icon / favicon, etc.
 AssetsDir: "assets"
+
 # Use the file name, not the full path
 Index: "wiki.md"
+
 # Again, just the file name. Currently, must be PNG, JPEG, or GIF.
 Icon: "icon.png"
 
 # PageDir holds the actual content pages for the wiki
 PageDir: "pages"
+
 # ReverseTally is false for Alphabetical, true for Reverse Alphabetical.
 # Set to reverse if you want to title your pages with dates and sort
 # the newest first.
@@ -62,6 +80,7 @@ ReverseTally: false
 
 # Regex to validate the URLs. You probably don't want to change this.
 ValidPath: "^/(w)/([a-zA-Z0-9-_]+)$"
+
 # URL path used to delineate the wiki pages.
 # The default is "w", which would appear publicly as:
 # example.com/w/page

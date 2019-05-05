@@ -27,10 +27,10 @@ func initConfigParams() *regexp.Regexp {
 	// name of config file to look for
 	conf.SetConfigName("tildewiki")
 	// location of said config file
+	conf.AddConfigPath(".")
+	conf.AddConfigPath("$HOME/.config/")
 	conf.AddConfigPath("/etc/")
 	conf.AddConfigPath("/usr/local/etc/")
-	conf.AddConfigPath("$HOME/.config/")
-	conf.AddConfigPath(".")
 
 	err := conf.ReadInConfig()
 	if err != nil {
@@ -41,7 +41,7 @@ func initConfigParams() *regexp.Regexp {
 	// file for any changes and automatically reloads it if needed
 	conf.WatchConfig()
 	conf.OnConfigChange(func(e fsnotify.Event) {
-		log.Println("NOTICE :: Config file change detected: ", e.Name)
+		log.Println("**NOTICE** Config file change detected: ", e.Name)
 	})
 
 	// Parse the HTML template file(s) and compile the regex path validation)
