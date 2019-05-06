@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-
-	"github.com/spf13/viper"
 )
 
 // TildeWiki version
@@ -18,16 +16,19 @@ func main() {
 	// show the logo, repo link, etc
 	setUpUsTheWiki()
 
+	// initialize the configuration
+	initConfigParams()
+
 	// set up logging if the config file params
 	// are set
-	if viper.GetBool("FileLogging") {
-		logfile, err := os.OpenFile(viper.GetString("LogFile"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if confVars.fileLogging {
+		llogfile, err := os.OpenFile(confVars.logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Printf("Couldn't log to file: %v\n", err)
 		}
-		log.SetOutput(logfile)
+		log.SetOutput(llogfile)
 		defer func() {
-			err := logfile.Close()
+			err := llogfile.Close()
 			if err != nil {
 				log.Printf("Couldn't close log file: %v\n", err)
 			}
@@ -35,14 +36,14 @@ func main() {
 	}
 	// Tell Tildewiki to be quiet,
 	// Supersedes file logging
-	if viper.GetBool("QuietLogging") {
-		logfile, err := os.Open("/dev/null")
+	if confVars.quietLogging {
+		llogfile, err := os.Open("/dev/null")
 		if err != nil {
 			log.Printf("Couldn't quiet logging: %v\n", err)
 		}
-		log.SetOutput(logfile)
+		log.SetOutput(llogfile)
 		defer func() {
-			err := logfile.Close()
+			err := llogfile.Close()
 			if err != nil {
 				log.Printf("Couldn't close log file: %v\n", err)
 			}
@@ -53,20 +54,17 @@ func main() {
 	log.Println("**NOTICE** Building initial cache ...")
 	genPageCache()
 
-	viewpath := "/" + viper.GetString("ViewPath") + "/"
-
 	http.HandleFunc("/", indexHandler)
-	http.HandleFunc(viewpath, validatePath(pageHandler))
+	http.HandleFunc(confVars.viewPath, validatePath(pageHandler))
 	http.HandleFunc("/css", cssHandler)
 	http.HandleFunc("/icon", iconHandler)
 
-	port := ":" + viper.GetString("Port")
-	log.Println("**NOTICE** Binding to " + port)
+	log.Println("**NOTICE** Binding to " + confVars.port)
 
 	// let the user know if using reversed page listings
-	if viper.GetBool("ReverseTally") {
+	if confVars.reverseTally {
 		log.Printf("**NOTICE** Using reversed page listings on index ... \n")
 	}
 
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(http.ListenAndServe(confVars.port, nil))
 }

@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/spf13/viper"
 )
 
 // handler for viewing content pages (not the index page)
@@ -46,7 +44,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", htmlutf8)
 	_, err := w.Write(indexCache.Body)
 	if err != nil {
-		log.Printf("Error writing %s to HTTP stream: %v\n", viper.GetString("CSS"), err)
+		log.Printf("Error writing %s to HTTP stream: %v\n", confVars.indexFile, err)
 		error500(w, r)
 	}
 }
@@ -57,7 +55,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func iconHandler(w http.ResponseWriter, r *http.Request) {
 
 	// read the raw bytes of the image
-	longname := viper.GetString("AssetsDir") + "/" + viper.GetString("Icon")
+	longname := confVars.assetsDir + "/" + confVars.iconPath
 	icon, err := ioutil.ReadFile(longname)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -86,13 +84,13 @@ func cssHandler(w http.ResponseWriter, r *http.Request) {
 	// check if using local or remote CSS.
 	// if remote, don't bother doing anything
 	// and redirect requests to /
-	if !cssLocal([]byte(viper.GetString("CSS"))) {
+	if !cssLocal([]byte(confVars.cssPath)) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
 	// read the raw bytes of the stylesheet
-	css, err := ioutil.ReadFile(viper.GetString("CSS"))
+	css, err := ioutil.ReadFile(confVars.cssPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			log.Printf("CSS file specified in config does not exist: /css request 404\n")
@@ -115,7 +113,7 @@ func cssHandler(w http.ResponseWriter, r *http.Request) {
 // to the appropriate handler function.
 func validatePath(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		m := validPath.FindStringSubmatch(r.URL.Path)
+		m := confVars.validPath.FindStringSubmatch(r.URL.Path)
 		if m == nil {
 			log.Printf("Invalid path requested :: %v\n", r.URL.Path)
 			error404(w, r)

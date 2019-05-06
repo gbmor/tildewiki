@@ -58,7 +58,7 @@ func Test_render(t *testing.T) {
 	for _, tt := range markdownTests {
 		t.Run(string(tt.name), func(t *testing.T) {
 			var got []byte
-			if got = render(tt.data, tt.css, tt.title); got == nil {
+			if got = render(tt.data, tt.title); got == nil {
 				t.Errorf("render() outputting nil bytes\n")
 			}
 		})
@@ -67,7 +67,7 @@ func Test_render(t *testing.T) {
 func Benchmark_render(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, c := range markdownTests {
-			render(c.data, c.css, c.title)
+			render(c.data, c.title)
 		}
 	}
 }

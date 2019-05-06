@@ -2,14 +2,13 @@ package main
 
 import (
 	bf "github.com/gbmor-forks/blackfriday.v2-patched"
-	"github.com/spf13/viper"
 )
 
 // Sets parameters for the markdown->html renderer
-func setupMarkdown(css string, title string) *bf.HTMLRenderer {
+func setupMarkdown(css, title string) *bf.HTMLRenderer {
 	// if using local CSS file, use the virtually-served css
 	// path rather than the actual file name
-	if cssLocal([]byte(viper.GetString("CSS"))) {
+	if cssLocal([]byte(confVars.cssPath)) {
 		css = "/css"
 	}
 
@@ -30,6 +29,6 @@ func setupMarkdown(css string, title string) *bf.HTMLRenderer {
 
 // Wrapper function to generate the parameters above and
 // pass them to the blackfriday library's parsing function
-func render(data []byte, css string, title string) []byte {
-	return bf.Run(data, bf.WithRenderer(setupMarkdown(css, title)))
+func render(data []byte, title string) []byte {
+	return bf.Run(data, bf.WithRenderer(setupMarkdown(confVars.cssPath, title)))
 }

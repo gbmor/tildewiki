@@ -54,19 +54,19 @@ func buildPage(filename string) (*Page, error) {
 		title = shortname
 	}
 	if desc != "" {
-		desc = viper.GetString("DescSeparator") + " " + desc
+		desc = confVars.descSep + " " + desc
 	}
 	if author != "" {
 		author = "`by " + author + "`"
 	}
 
 	// longtitle is used in the <title> tags of the output html
-	longtitle := title + " " + viper.GetString("TitleSeparator") + " " + viper.GetString("Name")
+	longtitle := title + " " + confVars.titleSep + " " + confVars.wikiName
 
 	// store the raw bytes of the document after parsing
 	// from markdown to HTML.
 	// keep the unparsed markdown for future use (maybe gopher?)
-	bodydata := render(body, viper.GetString("CSS"), longtitle)
+	bodydata := render(body, longtitle)
 	return newPage(filename, shortname, title, author, desc, stat.ModTime(), bodydata, body), nil
 }
 
@@ -112,17 +112,15 @@ func (body pagedata) getMeta() (string, string, string) {
 // index needs to be re-cached.
 func (indexCache *indexPage) checkCache() bool {
 
-	// parse the refresh interval
 	interval, err := time.ParseDuration(viper.GetString("IndexRefreshInterval"))
 	if err != nil {
 		log.Printf("Couldn't parse index refresh interval: %v\n", err)
-		return true
 	}
 	// stat the index page to get the mod time for the next block
-	stat, err := os.Stat(viper.GetString("AssetsDir") + "/" + viper.GetString("Index"))
+	stat, err := os.Stat(confVars.assetsDir + "/" + confVars.indexFile)
 	if err != nil {
 		log.Printf("Couldn't stat index page: %v\n", err)
-		return true
+		return false
 	}
 
 	// if the last tally time is zero, or past the
@@ -141,7 +139,7 @@ func (indexCache *indexPage) checkCache() bool {
 
 // Re-caches the index page
 func (indexCache *indexPage) cache() {
-	body := render(genIndex(), viper.GetString("CSS"), viper.GetString("Name")+" "+viper.GetString("TitleSeparator")+" "+viper.GetString("ShortDesc"))
+	body := render(genIndex(), confVars.wikiName+" "+confVars.titleSep+" "+confVars.wikiDesc)
 	imutex.Lock()
 	indexCache.Body = body
 	imutex.Unlock()
@@ -151,7 +149,7 @@ func (indexCache *indexPage) cache() {
 func genIndex() []byte {
 
 	var err error
-	indexpath := viper.GetString("AssetsDir") + "/" + viper.GetString("Index")
+	indexpath := confVars.assetsDir + "/" + confVars.indexFile
 
 	stat, err := os.Stat(indexpath)
 	if err != nil {
@@ -203,13 +201,10 @@ func tallyPages() []byte {
 	// displayed on the index page
 	pagelist := make([]byte, 0, 1)
 	buf := bytes.NewBuffer(pagelist)
-	pagedir := viper.GetString("PageDir")
-	viewpath := viper.GetString("ViewPath")
-	reverse := viper.GetBool("ReverseTally")
 
 	// get a list of files in the director specified
 	// in the config file parameter "PageDir"
-	files, err := ioutil.ReadDir(pagedir)
+	files, err := ioutil.ReadDir(confVars.pageDir)
 	if err != nil {
 		return []byte("*PageDir can't be read.*")
 	}
@@ -221,14 +216,14 @@ func tallyPages() []byte {
 	}
 
 	// true if reversing page order, otherwise don't reverse
-	switch reverse {
+	switch confVars.reverseTally {
 	case true:
 		for i := len(files) - 1; i >= 0; i-- {
-			writeIndexLinks(pagedir, viewpath, files[i], buf)
+			writeIndexLinks(files[i], buf)
 		}
 	default:
 		for _, f := range files {
-			writeIndexLinks(pagedir, viewpath, f, buf)
+			writeIndexLinks(f, buf)
 		}
 	}
 
@@ -237,7 +232,7 @@ func tallyPages() []byte {
 }
 
 // Takes in a file and outputs a markdown link to it
-func writeIndexLinks(pagedir string, viewpath string, f os.FileInfo, buf *bytes.Buffer) {
+func writeIndexLinks(f os.FileInfo, buf *bytes.Buffer) {
 
 	// pull the page from the cache
 	pmutex.RLock()
@@ -248,7 +243,7 @@ func writeIndexLinks(pagedir string, viewpath string, f os.FileInfo, buf *bytes.
 	// usually means the page is new.
 	if page.Body == nil {
 		page.Shortname = f.Name()
-		page.Longname = pagedir + "/" + f.Name()
+		page.Longname = confVars.pageDir + "/" + f.Name()
 		page.cache()
 	}
 
@@ -256,7 +251,7 @@ func writeIndexLinks(pagedir string, viewpath string, f os.FileInfo, buf *bytes.
 	// and write the formatted link to the
 	// bytes.Buffer
 	linkname := bytes.TrimSuffix([]byte(page.Shortname), []byte(".md"))
-	buf.WriteString("* [" + page.Title + "](/" + viewpath + "/" + string(linkname) + ") " + page.Desc + " " + page.Author + "\n")
+	buf.WriteString("* [" + page.Title + "](" + confVars.viewPath + string(linkname) + ") " + page.Desc + " " + page.Author + "\n")
 }
 
 // Caches a page
@@ -302,10 +297,9 @@ func genPageCache() {
 
 	// build an array of all the (*os.FileInfo)'s
 	// needed to build the cache
-	pagedir := viper.GetString("PageDir")
-	wikipages, err := ioutil.ReadDir(pagedir)
+	wikipages, err := ioutil.ReadDir(confVars.pageDir)
 	if err != nil {
-		log.Printf("Initial Cache Build :: Can't read directory %s\n", pagedir)
+		log.Printf("Initial Cache Build :: Can't read directory %s\n", confVars.pageDir)
 		panic(err)
 	}
 
@@ -317,7 +311,7 @@ func genPageCache() {
 		wg.Add(1)
 
 		go func() {
-			page := newBarePage(pagedir+"/"+f.Name(), f.Name())
+			page := newBarePage(confVars.pageDir+"/"+f.Name(), f.Name())
 			page.cache()
 			log.Println("Cached page " + page.Shortname)
 			wg.Done()

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"sync"
 	"time"
 )
@@ -22,6 +23,26 @@ var imutex = &sync.RWMutex{}
 type cacher interface {
 	cache()
 	checkCache() bool
+}
+
+type confParams struct {
+	port                 string
+	pageDir              string
+	assetsDir            string
+	cssPath              string
+	viewPath             string
+	indexRefreshInterval string
+	wikiName             string
+	wikiDesc             string
+	descSep              string
+	titleSep             string
+	iconPath             string
+	indexFile            string
+	reverseTally         bool
+	validPath            *regexp.Regexp
+	quietLogging         bool
+	fileLogging          bool
+	logFile              string
 }
 
 // Page cache object definition

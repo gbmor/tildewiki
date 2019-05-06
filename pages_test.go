@@ -6,8 +6,6 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 // to quiet the function output during
@@ -159,7 +157,6 @@ type indexFields struct {
 	LastTally time.Time
 }
 
-var testindexstat, _ = os.Stat(viper.GetString("AssetsDir") + "/" + viper.GetString("Index"))
 var IndexCacheCases = []struct {
 	name   string
 	fields indexFields
@@ -168,7 +165,6 @@ var IndexCacheCases = []struct {
 	{
 		name: "test1",
 		fields: indexFields{
-			Modtime:   testindexstat.ModTime(),
 			LastTally: time.Now(),
 		},
 		want: false,
@@ -191,9 +187,17 @@ var testIndex = indexPage{
 // Check if checkCache() method on indexPage type
 // is returning the expected bool
 func Test_indexPage_checkCache(t *testing.T) {
+	initConfigParams()
+	testindexstat, err := os.Stat(confVars.assetsDir + "/" + confVars.indexFile)
+	if err != nil {
+		t.Errorf("Test_indexPage_checkCache(): Couldn't stat file for first test case: %v\n", err)
+	}
 
 	for _, tt := range IndexCacheCases {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.name == "test1" {
+				tt.fields.Modtime = testindexstat.ModTime()
+			}
 			testIndex.Modtime = tt.fields.Modtime
 			testIndex.LastTally = tt.fields.LastTally
 			if got := testIndex.checkCache(); got != tt.want {
@@ -293,6 +297,7 @@ func Benchmark_Page_checkCache(b *testing.B) {
 
 // No output to test for
 func Benchmark_genPageCache(b *testing.B) {
+	initConfigParams()
 	log.SetOutput(hush)
 	for i := 0; i < b.N; i++ {
 		genPageCache()

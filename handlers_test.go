@@ -7,8 +7,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-
-	"github.com/spf13/viper"
 )
 
 // This is a pretty strict test. Make sure the
@@ -28,6 +26,7 @@ func Test_pageHandler(t *testing.T) {
 
 	hush, _ := os.Open("/dev/null")
 	log.SetOutput(hush)
+	initConfigParams()
 	genPageCache()
 
 	for _, tt := range tests {
@@ -68,7 +67,8 @@ func Test_indexHandler(t *testing.T) {
 // This is the same test type as pageHandler
 func Test_iconHandler(t *testing.T) {
 	name := "Icon Handler Test"
-	icon, _ := ioutil.ReadFile(viper.GetString("AssetsDir") + "/" + viper.GetString("Icon"))
+	initConfigParams()
+	icon, _ := ioutil.ReadFile(confVars.assetsDir + "/" + confVars.iconPath)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "localhost:8080/icon", nil)
 	t.Run(name, func(t *testing.T) {
@@ -87,10 +87,11 @@ func Test_iconHandler(t *testing.T) {
 // This is the same test type as pageHandler
 func Test_cssHandler(t *testing.T) {
 	name := "CSS Handler Test"
-	if !cssLocal([]byte(viper.GetString("CSS"))) {
+	initConfigParams()
+	if !cssLocal([]byte(confVars.cssPath)) {
 		t.Skipf("cssHandler(): Set to use remote CSS in config, skipping test ...\n")
 	}
-	css, _ := ioutil.ReadFile(viper.GetString("CSS"))
+	css, _ := ioutil.ReadFile(confVars.cssPath)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "localhost:8080/css", nil)
 	t.Run(name, func(t *testing.T) {
