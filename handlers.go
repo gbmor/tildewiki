@@ -122,3 +122,41 @@ func validatePath(fn func(http.ResponseWriter, *http.Request, string)) http.Hand
 		fn(w, r, m[2])
 	}
 }
+
+// this is a custom 500 page using a markdown doc
+// in the assets directory.
+// if the markdown doc can't be read, default to
+// net/http's error handling
+func error500(w http.ResponseWriter, _ *http.Request) {
+	e500 := confVars.assetsDir + "/500.md"
+	file, err := ioutil.ReadFile(e500)
+	if err != nil {
+		log.Printf("Tried to read 500.md: %v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", htmlutf8)
+	_, err = w.Write(render(file, "500: Internal Server Error"))
+	if err != nil {
+		log.Printf("Failed to write to HTTP stream: %v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// this is a custom 404 page using a markdown doc
+// in the assets directory.
+// if the markdown doc can't be read, default to
+// net/http's error handling
+func error404(w http.ResponseWriter, r *http.Request) {
+	e404 := confVars.assetsDir + "/404.md"
+	file, err := ioutil.ReadFile(e404)
+	if err != nil {
+		log.Printf("Tried to read 404.md: %v\n", err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+	}
+	w.Header().Set("Content-Type", htmlutf8)
+	_, err = w.Write(render(file, "404: File Not Found"))
+	if err != nil {
+		log.Printf("Failed to write to HTTP stream: %v\n", err)
+		error500(w, r)
+	}
+}
