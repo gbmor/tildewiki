@@ -307,15 +307,14 @@ func genPageCache() {
 	// everything as quickly as possible
 	var wg sync.WaitGroup
 	for _, f := range wikipages {
-		f := f
-		wg.Add(1)
 
-		go func() {
+		wg.Add(1)
+		go func(f os.FileInfo) {
 			page := newBarePage(confVars.pageDir+"/"+f.Name(), f.Name())
 			page.cache()
 			log.Println("Cached page " + page.Shortname)
 			wg.Done()
-		}()
+		}(f)
 	}
 
 	wg.Wait()
@@ -325,6 +324,7 @@ func genPageCache() {
 // of any cacher type, and if true,
 // re-cache the data
 func pingCache(c cacher) {
+
 	if c.checkCache() {
 		c.cache()
 	}
