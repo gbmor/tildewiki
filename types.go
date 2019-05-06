@@ -7,7 +7,7 @@ import (
 )
 
 // The in-memory page cache
-var cachedPages = make(map[string]Page)
+var cachedPages = make(map[string]*Page)
 
 // Mutex for the page cache
 var pmutex = &sync.RWMutex{}
@@ -55,6 +55,7 @@ type Page struct {
 	Modtime   time.Time
 	Body      []byte
 	Raw       pagedata
+	Recache   bool
 }
 
 // Index cache object definition
@@ -70,7 +71,7 @@ type indexPage struct {
 type pagedata []byte
 
 // Creates a filled page object
-func newPage(longname, shortname, title, author, desc string, modtime time.Time, body []byte, raw pagedata) *Page {
+func newPage(longname, shortname, title, author, desc string, modtime time.Time, body []byte, raw pagedata, recache bool) *Page {
 
 	return &Page{
 		Longname:  longname,
@@ -80,7 +81,8 @@ func newPage(longname, shortname, title, author, desc string, modtime time.Time,
 		Desc:      desc,
 		Modtime:   modtime,
 		Body:      body,
-		Raw:       raw}
+		Raw:       raw,
+		Recache:   recache}
 
 }
 

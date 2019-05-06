@@ -67,7 +67,7 @@ func buildPage(filename string) (*Page, error) {
 	// from markdown to HTML.
 	// keep the unparsed markdown for future use (maybe gopher?)
 	bodydata := render(body, longtitle)
-	return newPage(filename, shortname, title, author, desc, stat.ModTime(), bodydata, body), nil
+	return newPage(filename, shortname, title, author, desc, stat.ModTime(), bodydata, body, false), nil
 }
 
 // Scan the page until reaching following fields in the
@@ -266,7 +266,7 @@ func (page *Page) cache() {
 	}
 
 	pmutex.Lock()
-	cachedPages[newpage.Shortname] = *newpage
+	cachedPages[newpage.Shortname] = newpage
 	pmutex.Unlock()
 
 }
@@ -283,7 +283,7 @@ func (page *Page) checkCache() bool {
 		return false
 	}
 
-	if newpage.ModTime() != page.Modtime {
+	if newpage.ModTime() != page.Modtime || page.Recache {
 		return true
 	}
 
